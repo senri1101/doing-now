@@ -16,6 +16,13 @@ Trigger a global shortcut to display what you're working on right now. The bubbl
 ╚══════════════════════╝
 ```
 
+## Download
+
+Download the latest `.dmg` from the [Releases](../../releases) page and drag **notch-now.app** into your Applications folder.
+
+> **Note:** The app is not code-signed. On first launch, macOS will block it. To open it anyway:
+> right-click the app → **Open** → **Open** in the dialog.
+
 ## Usage
 
 | Action | Effect |
