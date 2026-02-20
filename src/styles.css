@@ -1,7 +1,7 @@
 :root {
-  --bubble-bg: rgba(0, 0, 0, 0.74);
-  --bubble-bg-strong: rgba(0, 0, 0, 0.88);
-  --bubble-text: rgba(255, 255, 255, 0.86);
+  --bubble-bg: rgba(20, 20, 20, 0.72);
+  --bubble-bg-strong: rgba(20, 20, 20, 0.9);
+  --bubble-text: rgba(255, 255, 255, 0.9);
 }
 
 html,
@@ -17,20 +17,20 @@ body {
   position: relative;
   width: 100vw;
   height: 100vh;
-  pointer-events: none;
 }
 
 .bubble {
   position: absolute;
-  top: 6px;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 640px;
+  width: 460px;
+  max-width: calc(100vw - 24px);
   height: 36px;
   border-radius: 999px;
   background: var(--bubble-bg);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   display: flex;
@@ -38,31 +38,15 @@ body {
   justify-content: center;
   padding: 0 18px;
   box-sizing: border-box;
-  pointer-events: auto;
-}
-
-.bubble::before {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 190px;
-  height: 18px;
-  background: rgba(0, 0, 0, 0.94);
-  border-bottom-left-radius: 18px;
-  border-bottom-right-radius: 18px;
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
 }
 
 .bubble.emphasis {
   background: var(--bubble-bg-strong);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
 }
 
 .label {
-  max-width: 560px;
+  max-width: 400px;
   font-size: 13px;
   letter-spacing: 0.2px;
   color: var(--bubble-text);
@@ -81,7 +65,7 @@ body {
   box-sizing: border-box;
   font-size: 13px;
   color: var(--bubble-text);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .hidden {

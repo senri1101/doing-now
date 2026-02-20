@@ -24,6 +24,14 @@ fn set_click_through(window: WebviewWindow, enable: bool) -> Result<(), String> 
 
 fn emit_mode(app: &AppHandle, mode: &str) {
     if let Some(window) = app.get_webview_window("main") {
+        match mode {
+            "edit" => {
+                let _ = window.set_ignore_cursor_events(false);
+            }
+            _ => {
+                let _ = window.set_ignore_cursor_events(true);
+            }
+        }
         let _ = window.show();
         let _ = window.set_focus();
         let _ = window.emit("mode", mode.to_string());

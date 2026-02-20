@@ -60,9 +60,12 @@ const enterEditMode = () => {
   label.classList.add("hidden");
   input.classList.remove("hidden");
   input.value = readStoredText();
-  void setClickThrough(false);
-  input.focus();
-  input.select();
+  void setClickThrough(false).finally(() => {
+    requestAnimationFrame(() => {
+      input.focus();
+      input.select();
+    });
+  });
 };
 
 input.addEventListener("keydown", (event) => {
