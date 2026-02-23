@@ -29,22 +29,22 @@ jobs:
       - name: Ad-hoc sign the app
         run: |
           codesign --force --deep --sign - \
-            "src-tauri/target/release/bundle/macos/notch-now.app"
+            "src-tauri/target/release/bundle/macos/doing-now.app"
 
       - name: Create DMG
         run: |
-          mkdir -p /tmp/notch-now-pkg
-          cp -r "src-tauri/target/release/bundle/macos/notch-now.app" /tmp/notch-now-pkg/
+          mkdir -p /tmp/doing-now-pkg
+          cp -r "src-tauri/target/release/bundle/macos/doing-now.app" /tmp/doing-now-pkg/
           hdiutil create \
-            -volname "notch-now" \
-            -srcfolder /tmp/notch-now-pkg \
+            -volname "doing-now" \
+            -srcfolder /tmp/doing-now-pkg \
             -ov -format UDZO \
-            "notch-now-${{ github.ref_name }}-macos.dmg"
+            "doing-now-${{ github.ref_name }}-macos.dmg"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: "doing-now ${{ github.ref_name }}"
-          files: notch-now-${{ github.ref_name }}-macos.dmg
+          files: doing-now-${{ github.ref_name }}-macos.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

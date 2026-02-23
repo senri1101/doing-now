@@ -72,7 +72,7 @@ fn handle_hotkey_pressed(app: &AppHandle) {
     std::thread::spawn(move || {
         std::thread::sleep(interval);
 
-        let should_emit_emphasis = {
+        let should_act = {
             let state = app_handle.state::<HotkeyState>();
             let mut inner = state.inner.lock().expect("hotkey state lock poisoned");
             if inner.sequence == token {
@@ -83,8 +83,20 @@ fn handle_hotkey_pressed(app: &AppHandle) {
             }
         };
 
-        if should_emit_emphasis {
-            emit_mode(&app_handle, "emphasis");
+        if should_act {
+            if let Some(window) = app_handle.get_webview_window("main") {
+                let is_visible = window.is_visible().unwrap_or(true);
+                if is_visible {
+                    // ウィンドウが表示中 → 最小化（非表示）
+                    let _ = window.set_ignore_cursor_events(true);
+                    let _ = window.hide();
+                } else {
+                    // ウィンドウが非表示 → 表示してemphasisモード
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                    let _ = window.emit("mode", "emphasis".to_string());
+                }
+            }
         }
     });
 }

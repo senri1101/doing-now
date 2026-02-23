@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "notch-now",
+  "productName": "doing-now",
   "version": "0.1.0",
-  "identifier": "com.senri1101.notchnow",
+  "identifier": "com.senri1101.doingnow",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -15,7 +15,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "notch-now",
+        "title": "doing-now",
         "width": 320,
         "height": 44,
         "decorations": false,
