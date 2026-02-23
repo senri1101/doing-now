@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tauri::{App, AppHandle, Emitter, Manager, PhysicalPosition, Position, WebviewWindow};
+use tauri_plugin_updater::UpdaterExt;
 
 const HOTKEY_INTERVAL_MS: u64 = 300;
 
@@ -14,6 +15,12 @@ struct HotkeyStateInner {
     last_pressed_at: Option<Instant>,
     sequence: u64,
 }
+
+#[derive(Default)]
+struct AppTray(Mutex<Option<tauri::tray::TrayIcon>>);
+
+#[derive(Default)]
+struct HasUpdate(Mutex<bool>);
 
 #[tauri::command]
 fn set_click_through(window: WebviewWindow, enable: bool) -> Result<(), String> {
@@ -139,13 +146,27 @@ fn place_window_to_top_left(window: &WebviewWindow) {
     )));
 }
 
+fn build_tray_menu(
+    app: &AppHandle,
+    has_update: bool,
+) -> tauri::Result<tauri::menu::Menu<tauri::Wry>> {
+    use tauri::menu::{MenuBuilder, MenuItemBuilder};
+    let mut builder = MenuBuilder::new(app);
+    if has_update {
+        let update_item =
+            MenuItemBuilder::with_id("install_update", "Install Update & Restart").build(app)?;
+        builder = builder.item(&update_item);
+    }
+    let quit_item = MenuItemBuilder::with_id("quit", "Quit doing-now").build(app)?;
+    builder.item(&quit_item).build()
+}
+
 // A3: System tray icon
 fn setup_tray(app: &App) -> tauri::Result<()> {
-    use tauri::menu::{MenuBuilder, MenuItemBuilder};
     use tauri::tray::TrayIconBuilder;
 
-    let quit_item = MenuItemBuilder::with_id("quit", "Quit doing-now").build(app)?;
-    let menu = MenuBuilder::new(app).item(&quit_item).build()?;
+    let handle = app.handle();
+    let menu = build_tray_menu(handle, false)?;
 
     if let Some(icon) = app.default_window_icon() {
         let tray = TrayIconBuilder::new()
@@ -153,14 +174,61 @@ fn setup_tray(app: &App) -> tauri::Result<()> {
             .menu(&menu)
             .show_menu_on_left_click(false)
             .on_menu_event(|app, event| match event.id.as_ref() {
+                "install_update" => {
+                    let app = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        perform_update(app).await;
+                    });
+                }
                 "quit" => app.exit(0),
                 _ => {}
             })
             .build(app)?;
-        // Keep the tray alive for the entire app lifetime
-        std::mem::forget(tray);
+
+        // Store in managed state so we can rebuild the menu later
+        *app.state::<AppTray>().0.lock().expect("AppTray lock poisoned") = Some(tray);
     }
     Ok(())
+}
+
+// Check for updates in the background; rebuild tray menu if one is available
+fn check_for_updates(app: AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        let Ok(updater) = app.updater() else { return };
+        let Ok(Some(_update)) = updater.check().await else {
+            return;
+        };
+
+        *app.state::<HasUpdate>().0.lock().expect("HasUpdate lock poisoned") = true;
+
+        if let Ok(menu) = build_tray_menu(&app, true) {
+            if let Some(tray) = app
+                .state::<AppTray>()
+                .0
+                .lock()
+                .expect("AppTray lock poisoned")
+                .as_ref()
+            {
+                let _ = tray.set_menu(Some(menu));
+            }
+        }
+    });
+}
+
+// Download and install the pending update, then restart
+async fn perform_update(app: AppHandle) {
+    let Ok(updater) = app.updater() else { return };
+    let Ok(Some(update)) = updater.check().await else {
+        return;
+    };
+    if let Err(e) = update
+        .download_and_install(|_chunk, _total| {}, || {})
+        .await
+    {
+        eprintln!("update install failed: {e}");
+        return;
+    }
+    app.restart();
 }
 
 #[cfg(desktop)]
@@ -200,7 +268,10 @@ fn register_global_shortcut(_app: &App) -> tauri::Result<()> {
 pub fn run() {
     tauri::Builder::default()
         .manage(HotkeyState::default())
+        .manage(AppTray::default())
+        .manage(HasUpdate::default())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         // A2: Launch at login
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
@@ -228,6 +299,9 @@ pub fn run() {
                 place_window_to_top_left(&window);
                 let _ = window.set_ignore_cursor_events(true);
             }
+
+            // Check for updates in the background
+            check_for_updates(app.handle().clone());
 
             Ok(())
         })

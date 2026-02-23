@@ -25,6 +25,8 @@ jobs:
 
       - name: Build Tauri app
         run: npm run tauri build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
 
       - name: Ad-hoc sign the app
         run: |
@@ -40,6 +42,31 @@ jobs:
             -srcfolder /tmp/doing-now-pkg \
             -ov -format UDZO \
             "doing-now-${{ github.ref_name }}-macos.dmg"
+
+      - name: Create updater manifest
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION_NO_V="${VERSION#v}"
+          SIG=$(cat "src-tauri/target/release/bundle/macos/doing-now.app.tar.gz.sig")
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "arm64" ]; then
+            PLATFORM="darwin-aarch64"
+          else
+            PLATFORM="darwin-x86_64"
+          fi
+          cat > latest.json <<EOF
+          {
+            "version": "$VERSION_NO_V",
+            "notes": "See the release page for details.",
+            "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "platforms": {
+              "$PLATFORM": {
+                "signature": "$SIG",
+                "url": "https://github.com/senri1101/doing-now/releases/download/$VERSION/doing-now.app.tar.gz"
+              }
+            }
+          }
+          EOF
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -61,6 +88,9 @@ jobs:
             ```
 
             **Requirements**: macOS 11+
-          files: doing-now-${{ github.ref_name }}-macos.dmg
+          files: |
+            doing-now-${{ github.ref_name }}-macos.dmg
+            src-tauri/target/release/bundle/macos/doing-now.app.tar.gz
+            latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
