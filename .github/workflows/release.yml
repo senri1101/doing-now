@@ -34,7 +34,7 @@ jobs:
       - name: Create DMG
         run: |
           mkdir -p /tmp/doing-now-pkg
-          cp -r "src-tauri/target/release/bundle/macos/doing-now.app" /tmp/doing-now-pkg/
+          ditto "src-tauri/target/release/bundle/macos/doing-now.app" "/tmp/doing-now-pkg/doing-now.app"
           hdiutil create \
             -volname "doing-now" \
             -srcfolder /tmp/doing-now-pkg \
@@ -45,6 +45,22 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: "doing-now ${{ github.ref_name }}"
+          body: |
+            ## Installation
+
+            1. Download the `.dmg` file below
+            2. Open the DMG and drag **doing-now** to Applications
+            3. Launch from Applications
+
+            ### "doing-now is damaged and can't be opened"
+
+            This app is ad-hoc signed (no Apple Developer ID). macOS quarantines files downloaded from the internet. Run the following command to clear the quarantine flag, then try again:
+
+            ```sh
+            xattr -dr com.apple.quarantine ~/Downloads/doing-now-${{ github.ref_name }}-macos.dmg
+            ```
+
+            **Requirements**: macOS 11+
           files: doing-now-${{ github.ref_name }}-macos.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
