@@ -28,8 +28,9 @@ body {
   position: absolute;
   top: 6px;
   left: 8px;
-  width: 280px;
-  max-width: calc(100vw - 16px);
+  width: auto;
+  min-width: 60px;
+  max-width: 280px;
   height: 30px;
   border-radius: 999px;
   background: var(--bubble-bg);
@@ -38,7 +39,7 @@ body {
   -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 0 12px;
   box-sizing: border-box;
 }
@@ -47,8 +48,28 @@ body {
   background: var(--bubble-bg-strong);
 }
 
+/* C2 – Edit mode: fixed width + border highlight */
+.bubble.edit {
+  width: 260px;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* C1 – Save animation */
+@keyframes saveFlash {
+  0% {
+    border-color: rgba(100, 200, 100, 0.7);
+  }
+  100% {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+.bubble.saving {
+  animation: saveFlash 0.5s ease-out forwards;
+}
+
 .label {
-  max-width: 244px;
+  max-width: 256px;
   font-size: 13px;
   letter-spacing: 0.1px;
   line-height: 1.2;
@@ -65,7 +86,7 @@ body {
   border: 0;
   border-radius: 999px;
   outline: 0;
-  padding: 0 10px;
+  padding: 0 28px 0 10px;
   box-sizing: border-box;
   font-size: 13px;
   font-family: inherit;
@@ -78,6 +99,20 @@ body {
 .bubble.emphasis .label,
 .bubble.emphasis .input {
   color: var(--bubble-text-strong);
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* B2 – Character counter */
+.counter {
+  position: absolute;
+  right: 14px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  line-height: 1;
 }
 
 .hidden {
