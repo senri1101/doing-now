@@ -1,7 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 
-const STORAGE_KEY = "notch_now.text";
+const STORAGE_KEY = "doing_now.text";
 const EMPHASIS_DURATION_MS = 2000;
 
 const bubble = document.querySelector<HTMLDivElement>("#bubble");
@@ -48,6 +48,10 @@ const enterNormalMode = () => {
 
 const enterEmphasisMode = () => {
   clearEmphasisTimer();
+  // 非表示状態から復帰した場合にeditモードをリセット
+  input.classList.add("hidden");
+  label.classList.remove("hidden");
+  void setClickThrough(true);
   bubble.classList.add("emphasis");
   emphasisTimerId = window.setTimeout(() => {
     bubble.classList.remove("emphasis");

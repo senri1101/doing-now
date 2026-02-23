@@ -34,7 +34,6 @@ body {
   border-radius: 999px;
   background: var(--bubble-bg);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   display: flex;
@@ -46,7 +45,6 @@ body {
 
 .bubble.emphasis {
   background: var(--bubble-bg-strong);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
 }
 
 .label {
