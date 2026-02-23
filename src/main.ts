@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 const STORAGE_KEY = "doing_now.text";
 const ONBOARDED_KEY = "doing_now.onboarded";
 const EMPHASIS_DURATION_MS = 2000;
-const MAX_LENGTH = 20;
+const MAX_LENGTH = 40;
 
 const bubble = document.querySelector<HTMLDivElement>("#bubble");
 const label = document.querySelector<HTMLSpanElement>("#label");
