@@ -2,7 +2,6 @@ import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 
 const STORAGE_KEY = "doing_now.text";
-const ONBOARDED_KEY = "doing_now.onboarded";
 const EMPHASIS_DURATION_MS = 2000;
 const MAX_LENGTH = 40;
 
@@ -17,16 +16,6 @@ if (!bubble || !label || !input || !counter) {
 
 let emphasisTimerId: number | null = null;
 let isComposing = false;
-
-// A1 – Onboarding helpers
-const isOnboarded = (): boolean => localStorage.getItem(ONBOARDED_KEY) === "1";
-
-const markOnboarded = (): void => {
-  localStorage.setItem(ONBOARDED_KEY, "1");
-};
-
-const getEmptyLabel = (): string =>
-  isOnboarded() ? "Now" : "⌥⌘Space to set task";
 
 // D1 – Async file-based storage
 const readStoredText = async (): Promise<string> => {
@@ -58,7 +47,7 @@ const setText = async (rawText: string): Promise<void> => {
   } catch (error) {
     console.error("failed to write text", error);
   }
-  label.textContent = text.length > 0 ? text : getEmptyLabel();
+  label.textContent = text.length > 0 ? text : "Now";
 };
 
 const setClickThrough = async (enable: boolean): Promise<void> => {
@@ -156,7 +145,6 @@ input.addEventListener("keydown", async (event) => {
       return;
     }
     event.preventDefault();
-    markOnboarded(); // A1 – mark before setText so getEmptyLabel returns "Now"
     await setText(input.value);
     enterNormalMode();
     triggerSaveAnimation(); // C1
@@ -182,9 +170,9 @@ void listen("mode", (event) => {
   }
 });
 
-// D1 + A1 – Init: read from file storage, show onboarding hint if applicable
+// Init: read from file storage
 void (async () => {
   const t = await readStoredText();
-  label.textContent = t.length > 0 ? t : getEmptyLabel();
+  label.textContent = t.length > 0 ? t : "Now";
   enterNormalMode();
 })();

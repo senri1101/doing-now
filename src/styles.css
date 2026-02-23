@@ -99,6 +99,10 @@ body {
   color: var(--bubble-text-strong);
 }
 
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
 /* B2 – Character counter */
 .counter {
   position: absolute;
